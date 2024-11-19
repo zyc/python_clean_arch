@@ -3,24 +3,23 @@ import unittest
 import pytest
 from sqlalchemy import text
 
-from src.domain.models.user import User
-from src.infra.db.session import DatabaseSessionManager
-from src.infra.repositories.user_repository import UserSQLAlchemyRepository
+from ....domain.models.user import User
+from ....infra.db.session import DatabaseSessionManager
+from ....infra.repositories.user_repository import UserSQLAlchemyRepository
 
 
 class TestUserRepository(unittest.TestCase):
 
     def setUp(self):
-        db_manager = DatabaseSessionManager()
-        self.session = db_manager.Session()
-        self.repository = UserSQLAlchemyRepository(db_manager)
+        self.__db_manager = DatabaseSessionManager()
+        # self.repository = UserSQLAlchemyRepository(self.__db_manager)
 
-    def tearDown(self):
-        self.session.close()
+    # def tearDown(self):
+        # self.session.close()
 
     # @pytest.mark.skip(reason="This test is not ready yet")
     def test_add(self):
-        with self.session as session:
+        with self.__db_manager.create_session() as session:
             user = User(
                 user_id=0,
                 first_name='any_first_name',
@@ -28,7 +27,8 @@ class TestUserRepository(unittest.TestCase):
                 age=30
             )
 
-            self.repository.add(user)
+            repository = UserSQLAlchemyRepository(session)
+            repository.add(user)
 
             sql = '''
                         select * from app_user
@@ -52,7 +52,7 @@ class TestUserRepository(unittest.TestCase):
             print(user)
 
     def test_get(self):
-        with self.session as session:
+        with self.__db_manager.create_session() as session:
             first_name = 'any_first_name_2'
             last_name = 'any_last_name_2'
             age = 30
@@ -67,7 +67,8 @@ class TestUserRepository(unittest.TestCase):
             generated_id = result.scalar()
             session.commit()
 
-            user = self.repository.get(generated_id)
+            repository = UserSQLAlchemyRepository(session)
+            user = repository.get(generated_id)
 
             assert user.first_name == first_name
             assert user.last_name == last_name

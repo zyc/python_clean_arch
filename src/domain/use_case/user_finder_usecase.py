@@ -1,6 +1,6 @@
 from typing import Dict
 
-from src.domain.repositories.user_repository import UserRepository
+from ..repositories.user_repository import UserRepository
 
 
 class UserFinderUseCase:

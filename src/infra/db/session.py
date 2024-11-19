@@ -2,9 +2,9 @@ import os
 from contextlib import contextmanager
 
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
+from sqlalchemy import Engine, create_engine
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
@@ -15,7 +15,7 @@ class DatabaseSessionManager:
         self.__connection_string = os.getenv(
             "DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/clean_arch")
         self.__engine = self.__create_database_engine()
-        self.Session = sessionmaker(bind=self.__engine)
+        self.__session = sessionmaker(bind=self.__engine)
 
     def __create_database_engine(self):
         try:
@@ -25,12 +25,12 @@ class DatabaseSessionManager:
             print(f"Erro ao criar o engine do banco de dados: {e}")
             raise
 
-    def get_engine(self):
+    def get_engine(self) -> Engine:
         return self.__engine
 
     @contextmanager
-    def get_session(self):
-        session = self.Session()
+    def create_session(self) -> Session:
+        session = self.__session()
         try:
             yield session
             session.commit()

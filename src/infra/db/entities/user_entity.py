@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String
 
-from src.infra.db.settings.base import Base
+from ..base import Base
 
 
 class UserEntity (Base):
